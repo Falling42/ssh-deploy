@@ -73,7 +73,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Run SSH Deploy Script with environment variables
       env:
@@ -96,5 +96,5 @@ runs:
         TRANSFER_FILES: ${{ inputs.transfer_files }}
         SOURCE_FILE_PATH: ${{ inputs.source_file_path }}
         DESTINATION_PATH: ${{ inputs.destination_path }}
-      run: bash scripts/deploy-via-ssh.sh
+      run: scripts/deploy-via-ssh.sh
       shell: bash
