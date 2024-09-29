@@ -32,6 +32,10 @@ check_param() {
   fi
 }
 
+ssh_init(){
+  mkdir -p ~/.ssh/
+}
+
 # 设置 SSH 私钥
 setup_ssh_key() {
   local ssh_key="$1"
@@ -178,6 +182,7 @@ check_required_params(){
 
 setup_ssh(){
   # 配置ssh
+  ssh_init
   if [ "$USE_JUMP_HOST" == "yes" ]; then
     check_param "$JUMP_SSH_HOST" "Jump SSH host"
     check_param "$JUMP_SSH_USER" "Jump SSH user"
