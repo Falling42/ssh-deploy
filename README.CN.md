@@ -1,6 +1,6 @@
 # Deploy via SSH
 
- [English](README.md)|[简体中文](README.CN.md)
+ [English](README.md) | [简体中文](README.CN.md)
 
 **Deploy via SSH ** 是一个通过 SSH 部署应用的 GitHub Action。它支持文件传输、执行远程脚本，并可以使用跳板机进行安全的 SSH 连接。
 

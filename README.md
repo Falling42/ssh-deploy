@@ -1,6 +1,6 @@
 # Deploy via SSH
 
- [English](README.md)|[简体中文](README.CN.md)
+ [English](README.md) | [简体中文](README.CN.md)
 
 **Deploy via SSH** is a GitHub Action for deploying applications via SSH. It supports file transfers, executing remote scripts, and allows for secure SSH connections using a jump host.
 
