@@ -75,28 +75,27 @@ runs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
-    - name: Set Environment Variables for SSH Deploy
-      run: |
-        echo "USE_SCREEN=${{ inputs.use_screen }}" >> $GITHUB_ENV
-        echo "USE_JUMP_HOST=${{ inputs.use_jump_host }}" >> $GITHUB_ENV
-        echo "JUMP_SSH_HOST=${{ inputs.jump_ssh_host }}" >> $GITHUB_ENV
-        echo "JUMP_SSH_USER=${{ inputs.jump_ssh_user }}" >> $GITHUB_ENV
-        echo "JUMP_SSH_PRIVATE_KEY=${{ inputs.jump_ssh_private_key }}" >> $GITHUB_ENV
-        echo "JUMP_SSH_PORT=${{ inputs.jump_ssh_port }}" >> $GITHUB_ENV
-        echo "SSH_HOST=${{ inputs.ssh_host }}" >> $GITHUB_ENV
-        echo "SSH_USER=${{ inputs.ssh_user }}" >> $GITHUB_ENV
-        echo "SSH_PRIVATE_KEY=${{ inputs.ssh_private_key }}" >> $GITHUB_ENV
-        echo "SSH_PORT=${{ inputs.ssh_port }}" >> $GITHUB_ENV
-        echo "COPY_SCRIPT=${{ inputs.copy_script }}" >> $GITHUB_ENV
-        echo "SOURCE_SCRIPT=${{ inputs.source_script }}" >> $GITHUB_ENV
-        echo "DEPLOY_SCRIPT=${{ inputs.deploy_script }}" >> $GITHUB_ENV
-        echo "SERVICE_NAME=${{ inputs.service_name }}" >> $GITHUB_ENV
-        echo "SERVICE_VERSION=${{ inputs.service_version }}" >> $GITHUB_ENV
-        echo "EXECUTE_REMOTE_SCRIPT=${{ inputs.execute_remote_script }}" >> $GITHUB_ENV
-        echo "TRANSFER_FILES=${{ inputs.transfer_files }}" >> $GITHUB_ENV
-        echo "SOURCE_FILE_PATH=${{ inputs.source_file_path }}" >> $GITHUB_ENV
-        echo "DESTINATION_PATH=${{ inputs.destination_path }}" >> $GITHUB_ENV
-      shell: bash
+    - name: Run SSH Deploy Script with environment variables
+      env:
+        USE_SCREEN: ${{ inputs.use_screen }}
+        USE_JUMP_HOST: ${{ inputs.use_jump_host }}
+        JUMP_SSH_HOST: ${{ inputs.jump_ssh_host }}
+        JUMP_SSH_USER: ${{ inputs.jump_ssh_user }}
+        JUMP_SSH_PRIVATE_KEY: ${{ inputs.jump_ssh_private_key }}
+        JUMP_SSH_PORT: ${{ inputs.jump_ssh_port }}
+        SSH_HOST: ${{ inputs.ssh_host }}
+        SSH_USER: ${{ inputs.ssh_user }}
+        SSH_PRIVATE_KEY: ${{ inputs.ssh_private_key }}
+        SSH_PORT: ${{ inputs.ssh_port }}
+        COPY_SCRIPT: ${{ inputs.copy_script }}
+        SOURCE_SCRIPT: ${{ inputs.source_script }}
+        DEPLOY_SCRIPT: ${{ inputs.deploy_script }}
+        SERVICE_NAME: ${{ inputs.service_name }}
+        SERVICE_VERSION: ${{ inputs.service_version }}
+        EXECUTE_REMOTE_SCRIPT: ${{ inputs.execute_remote_script }}
+        TRANSFER_FILES: ${{ inputs.transfer_files }}
+        SOURCE_FILE_PATH: ${{ inputs.source_file_path }}
+        DESTINATION_PATH: ${{ inputs.destination_path }}
 
     - name: Run SSH Deploy Script
       run: bash scripts/deploy-via-ssh.sh
