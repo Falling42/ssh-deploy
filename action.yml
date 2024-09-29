@@ -74,6 +74,9 @@ runs:
   steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+      with:
+        repository: falling42/ssh-deploy
+        path: external-repo  # 将脚本检出到一个子目录
 
     - name: List files in the current directory
       run: ls -la
@@ -100,5 +103,5 @@ runs:
         TRANSFER_FILES: ${{ inputs.transfer_files }}
         SOURCE_FILE_PATH: ${{ inputs.source_file_path }}
         DESTINATION_PATH: ${{ inputs.destination_path }}
-      run: deploy-via-ssh.sh
+      run: ./external-repo/deploy-via-ssh.sh
       shell: bash
