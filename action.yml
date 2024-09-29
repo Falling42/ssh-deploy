@@ -1,15 +1,30 @@
-name: 'SSH Deploy By Falling42'
+name: 'Deploy via SSH'
 description: 'Deploys application using SSH'
 branding:
   icon: 'terminal'
   color: 'gray-dark'
 inputs:
+  use_screen:
+    description: 'Whether to use screen to execute command (yes or no)'
+    required: false
+    default: 'no'
+  use_jump_host:
+    description: 'Whether to use a jump host (yes or no)'
+    required: false
+    default: 'no'
   jump_ssh_host:
     description: 'Jump SSH Host'
-    required: true
+    required: false
   jump_ssh_user:
     description: 'Jump SSH User'
-    required: true
+    required: false
+  jump_ssh_private_key:
+    description: 'Jump SSH Private Key'
+    required: false
+  jump_ssh_port:
+    description: 'Jump SSH Port (default: 22)'
+    required: false
+    default: '22'
   ssh_host:
     description: 'SSH Host'
     required: true
@@ -19,15 +34,40 @@ inputs:
   ssh_private_key:
     description: 'SSH Private Key'
     required: true
+  ssh_port:
+    description: 'SSH Port (default: 22)'
+    required: false
+    default: '22'  
+  execute_remote_script:
+    description: 'Whether to execute the remote script (yes or no)'
+    required: false
+    default: 'no'
+  copy_script:
+    description: 'Whether to copy the soucre script from your repository (yes or no)'
+    required: false
+    default: 'no'  
+  source_script:
+    description: 'Relative path to source script in your repository'
+    required: false
   deploy_script:
-    description: 'Path to the deployment script on the remote server'
-    required: true
+    description: 'Full path to the deployment script on your remote server'
+    required: false
   service_name:
     description: 'The service name to deploy'
-    required: true
+    required: false
   service_version:
     description: 'The service version to deploy'
-    required: true
+    required: false
+  transfer_files:
+    description: 'Whether to transfer files to your remote server (yes or no)'
+    required: false
+    default: 'yes'
+  source_file_path:
+    description: 'Relative path to the file to upload as an artifact'
+    required: false
+  destination_path:
+    description: 'Full path on your remote server to transfer the file to'
+    required: false
 
 runs:
   using: 'composite'
@@ -35,15 +75,29 @@ runs:
     - name: Checkout repo
       uses: actions/checkout@v2
 
-    - name: Run SSH Deploy Script
+    - name: Set Environment Variables for SSH Deploy
       run: |
-        bash scripts/deploy-via-ssh.sh \
-          "${{ inputs.ssh_private_key }}" \
-          "${{ inputs.jump_ssh_host }}" \
-          "${{ inputs.jump_ssh_user }}" \
-          "${{ inputs.ssh_host }}" \
-          "${{ inputs.ssh_user }}" \
-          "${{ inputs.deploy_script }}" \
-          "${{ inputs.service_name }}" \
-          "${{ inputs.service_version }}"
+        echo "USE_SCREEN=${{ inputs.use_screen }}" >> $GITHUB_ENV
+        echo "USE_JUMP_HOST=${{ inputs.use_jump_host }}" >> $GITHUB_ENV
+        echo "JUMP_SSH_HOST=${{ inputs.jump_ssh_host }}" >> $GITHUB_ENV
+        echo "JUMP_SSH_USER=${{ inputs.jump_ssh_user }}" >> $GITHUB_ENV
+        echo "JUMP_SSH_PRIVATE_KEY=${{ inputs.jump_ssh_private_key }}" >> $GITHUB_ENV
+        echo "JUMP_SSH_PORT=${{ inputs.jump_ssh_port }}" >> $GITHUB_ENV
+        echo "SSH_HOST=${{ inputs.ssh_host }}" >> $GITHUB_ENV
+        echo "SSH_USER=${{ inputs.ssh_user }}" >> $GITHUB_ENV
+        echo "SSH_PRIVATE_KEY=${{ inputs.ssh_private_key }}" >> $GITHUB_ENV
+        echo "SSH_PORT=${{ inputs.ssh_port }}" >> $GITHUB_ENV
+        echo "COPY_SCRIPT=${{ inputs.copy_script }}" >> $GITHUB_ENV
+        echo "SOURCE_SCRIPT=${{ inputs.source_script }}" >> $GITHUB_ENV
+        echo "DEPLOY_SCRIPT=${{ inputs.deploy_script }}" >> $GITHUB_ENV
+        echo "SERVICE_NAME=${{ inputs.service_name }}" >> $GITHUB_ENV
+        echo "SERVICE_VERSION=${{ inputs.service_version }}" >> $GITHUB_ENV
+        echo "EXECUTE_REMOTE_SCRIPT=${{ inputs.execute_remote_script }}" >> $GITHUB_ENV
+        echo "TRANSFER_FILES=${{ inputs.transfer_files }}" >> $GITHUB_ENV
+        echo "SOURCE_FILE_PATH=${{ inputs.source_file_path }}" >> $GITHUB_ENV
+        echo "DESTINATION_PATH=${{ inputs.destination_path }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Run SSH Deploy Script
+      run: bash scripts/deploy-via-ssh.sh
       shell: bash

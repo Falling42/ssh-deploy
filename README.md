@@ -1,24 +1,55 @@
-# SSH Deploy GitHub Action
+# Deploy via SSH
 
-This Action allows you to deploy your application to a remote server via SSH using a jump host (bastion) for more secure deployment.
+ [English](README.md)|[简体中文](README.CN.md)
 
-## Inputs
+**Deploy via SSH** is a GitHub Action for deploying applications via SSH. It supports file transfers, executing remote scripts, and allows for secure SSH connections using a jump host.
 
-| Name              | Description                                                 | Required | Default |
-| ----------------- | ----------------------------------------------------------- | -------- | ------- |
-| `jump_ssh_host`   | The SSH host (jump server) for the bastion connection.      | `true`   |         |
-| `jump_ssh_user`   | The SSH user for the jump host.                             | `true`   |         |
-| `ssh_host`        | The destination SSH host where the application is deployed. | `true`   |         |
-| `ssh_user`        | The SSH user for the destination server.                    | `true`   |         |
-| `ssh_private_key` | The private SSH key used for authentication.                | `true`   |         |
-| `deploy_script`   | Path to the deployment script on the remote server.         | `true`   |         |
-| `service_name`    | The name of the service to be deployed.                     | `true`   |         |
-| `service_version` | The version of the service to deploy.                       | `true`   |         |
+## Features
 
-## Usage Example
+- **SSH Connection**: Connect to remote servers via SSH, with support for using a jump host.
+- **File Transfer**: Transfer files from your repository to the remote server.
+- **Remote Script Execution**: Execute deployment scripts on the remote server.
+- **Supports `screen` Sessions**: Use `screen` to ensure deployment tasks continue even after the SSH session ends (**Ensure `screen` is installed on the remote server**).
+- **Flexible Configuration**: Configure SSH settings, file transfers, and script execution through input parameters.
+
+## Prerequisites
+
+Before using this action, ensure that:
+
+- The remote server can be accessed via SSH.
+- If using a jump host, ensure the jump host is accessible.
+- SSH public key authentication is set up on the remote server, and you have the corresponding private key.
+
+## Input Parameters
+
+| Input Name              | Description                                                  | Required | Default |
+| ----------------------- | ------------------------------------------------------------ | -------- | ------- |
+| `use_screen`            | Whether to use `screen` to execute commands (`yes` or `no`)  | No       | `no`    |
+| `use_jump_host`         | Whether to use a jump host (`yes` or `no`)                   | No       | `no`    |
+| `jump_ssh_host`         | The SSH host name of the jump host                           | No       |         |
+| `jump_ssh_user`         | The SSH username for the jump host                           | No       |         |
+| `jump_ssh_private_key`  | The SSH private key for the jump host                        | No       |         |
+| `jump_ssh_port`         | The SSH port for the jump host (default: `22`)               | No       | `22`    |
+| `ssh_host`              | The SSH host name of the remote server                       | Yes      |         |
+| `ssh_user`              | The SSH username for the remote server                       | Yes      |         |
+| `ssh_private_key`       | The SSH private key for the remote server                    | Yes      |         |
+| `ssh_port`              | The SSH port for the remote server (default: `22`)           | No       | `22`    |
+| `execute_remote_script` | Whether to execute a remote script (`yes` or `no`)           | No       | `no`    |
+| `copy_script`           | Whether to copy a deployment script from your repository (`yes` or `no`) | No       | `no`    |
+| `source_script`         | The relative path to the source script in your repository    | No       |         |
+| `deploy_script`         | The full path to the deployment script on the remote server  | No       |         |
+| `service_name`          | The name of the service to deploy                            | No       |         |
+| `service_version`       | The version of the service to deploy                         | No       |         |
+| `transfer_files`        | Whether to transfer files to the remote server (`yes` or `no`) | No       | `yes`   |
+| `source_file_path`      | The relative path to the file to upload from the repository  | No       |         |
+| `destination_path`      | The full path on the remote server to transfer the file to   | No       |         |
+
+## Example Workflow
+
+Here is an example of a GitHub Actions workflow using this action:
 
 ```yaml
-name: Deploy Application
+name: Deploy to Remote Server
 
 on:
   push:
@@ -29,61 +60,65 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Deploy to Remote Server
-        uses: your-username/your-actions-repo/ssh-deploy@v1.0.0
+      # ... other jobs ...
+      - name: Deploy Application via SSH
+        uses: falling42/ssh-deploy@v1
         with:
-          jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
-          jump_ssh_user: ${{ secrets.JUMP_SSH_USER }}
+          use_screen: "yes" # Defaults to no, omit if not needed
           ssh_host: ${{ secrets.SSH_HOST }}
           ssh_user: ${{ secrets.SSH_USER }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          deploy_script: './deploy.sh'
-          service_name: 'my-app'
-          service_version: '1.0.0'
+          ssh_port: 23456 # Default is 22, omit if not needed
+          use_jump_host: "no" # Defaults to no, omit if not needed
+          transfer_files: "yes" # Defaults to yes, as transferring files is a core function of this action :)
+          source_file_path: "./build/app.jar" # Artifact from an upstream job
+          destination_path: "/var/www/app/" # Ensure the remote server has this directory
+          execute_remote_script: "yes" # Enable this for the following parameters to take effect
+          copy_script: "yes" # If disabled, the deploy_script must already exist on the remote server
+          source_script: "scripts/deploy.sh" # Ensure this file exists in your repository
+          deploy_script: "/var/www/scripts/deploy.sh" # This file will be overwritten each time if copy_script is enabled
+          service_name: "my-app" # Can be hardcoded or use an upstream variable
+          service_version: ${{ steps.meta.outputs.version }} # Populate from upstream variable if needed by your deploy script
 ```
 
-## Secrets Configuration
+### Using a Jump Host
 
-For security reasons, it is recommended to store sensitive information such as the SSH private key and server credentials in GitHub Secrets.
+If there is network instability between GitHub's servers and your target server, you can connect via a jump host by adding the following configuration:
 
-| Secret Name       | Description                              |
-| ----------------- | ---------------------------------------- |
-| `JUMP_SSH_HOST`   | The SSH host (jump server) IP or domain. |
-| `JUMP_SSH_USER`   | The SSH user for the jump server.        |
-| `SSH_HOST`        | The SSH host where deployment occurs.    |
-| `SSH_USER`        | The SSH user for the destination host.   |
-| `SSH_PRIVATE_KEY` | The private SSH key for authentication.  |
+```yaml
+      - name: Deploy Application via SSH with Jump Host
+        uses: falling42/ssh-deploy@v1
+        with:
+          use_jump_host: "yes"
+          jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
+          jump_ssh_user: ${{ secrets.JUMP_SSH_USER }}
+          jump_ssh_private_key: ${{ secrets.JUMP_SSH_PRIVATE_KEY }}
+          jump_ssh_port: 34567 # Default is 22, omit if not needed
+          # ...
+```
 
-### Example GitHub Secrets
+### Using Secrets
 
-To set up these secrets in your repository:
+It is recommended to store sensitive information such as SSH keys and host details in GitHub Secrets. You can configure secrets in your repository's settings (**Settings** > **Secrets and Variables** > **Actions**). The following secrets are recommended:
 
-1. Navigate to your repository on GitHub.
+| Secret Name            | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| `JUMP_SSH_HOST`        | The SSH host IP or domain name of the jump host.     |
+| `JUMP_SSH_USER`        | The SSH username for the jump host.                  |
+| `JUMP_SSH_PRIVATE_KEY` | The SSH private key for the jump host.               |
+| `SSH_HOST`             | The SSH host IP or domain name of the target server. |
+| `SSH_USER`             | The SSH username for the target server.              |
+| `SSH_PRIVATE_KEY`      | The SSH private key for the target server.           |
 
-2. Click on `Settings` > `Secrets and variables` > `Actions`.
+## Outputs
 
-3. Click on 
+This action does not produce any outputs at this time.
 
-   ```
-   New repository secret
-   ```
+## Error Handling
 
-    and add each of the following secrets:
+If any required inputs are missing or if an SSH, SCP, or script execution command fails, the action will exit with an error. Check the logs for detailed error information.
 
-   - `JUMP_SSH_HOST`
-   - `JUMP_SSH_USER`
-   - `SSH_HOST`
-   - `SSH_USER`
-   - `SSH_PRIVATE_KEY`
+## Security
 
-## How it Works
-
-This GitHub Action performs the following steps:
-
-1. Sets up SSH key authentication using the provided `ssh_private_key`.
-2. Configures an SSH connection through a jump host.
-3. Executes the provided `deploy_script` on the remote server, deploying the specified service (`service_name`) at the specified version (`service_version`).
-4. The script is executed inside a new `screen` session to ensure the deployment process continues in case the SSH session is disconnected.
+- Ensure that sensitive data such as SSH keys and host information are stored in GitHub Secrets.
+- Avoid hardcoding sensitive data directly in your workflow YAML file.
