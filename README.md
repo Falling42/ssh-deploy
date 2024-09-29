@@ -64,20 +64,20 @@ jobs:
       - name: Deploy Application via SSH
         uses: falling42/ssh-deploy@v0.1.0
         with:
-          use_screen: "yes" # Defaults to no, omit if not needed
+          use_screen: 'yes' # Defaults to no, omit if not needed
           ssh_host: ${{ secrets.SSH_HOST }}
           ssh_user: ${{ secrets.SSH_USER }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_port: 23456 # Default is 22, omit if not needed
-          use_jump_host: "no" # Defaults to no, omit if not needed
-          transfer_files: "yes" # Defaults to yes, as transferring files is a core function of this action :)
-          source_file_path: "./build/app.jar" # Artifact from an upstream job
-          destination_path: "/var/www/app/" # Ensure the remote server has this directory
-          execute_remote_script: "yes" # Enable this for the following parameters to take effect
-          copy_script: "yes" # If disabled, the deploy_script must already exist on the remote server
-          source_script: "scripts/deploy.sh" # Ensure this file exists in your repository
-          deploy_script: "/var/www/scripts/deploy.sh" # This file will be overwritten each time if copy_script is enabled
-          service_name: "my-app" # Can be hardcoded or use an upstream variable
+          use_jump_host: 'no' # Defaults to no, omit if not needed
+          transfer_files: 'yes' # Defaults to yes, as transferring files is a core function of this action :)
+          source_file_path: './build/app.jar' # Artifact from an upstream job
+          destination_path: '/var/www/app/' # Ensure the remote server has this directory
+          execute_remote_script: 'yes' # Enable this for the following parameters to take effect
+          copy_script: 'yes' # If disabled, the deploy_script must already exist on the remote server
+          source_script: 'scripts/deploy.sh' # Ensure this file exists in your repository
+          deploy_script: '/var/www/scripts/deploy.sh' # This file will be overwritten each time if copy_script is enabled
+          service_name: 'my-app' # Can be hardcoded or use an upstream variable
           service_version: ${{ steps.meta.outputs.version }} # Populate from upstream variable if needed by your deploy script
 ```
 
@@ -87,9 +87,9 @@ If there is network instability between GitHub's servers and your target server,
 
 ```yaml
       - name: Deploy Application via SSH with Jump Host
-        uses: falling42/ssh-deploy@v01.0
+        uses: falling42/ssh-deploy@v0.1.0
         with:
-          use_jump_host: "yes"
+          use_jump_host: 'yes'
           jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
           jump_ssh_user: ${{ secrets.JUMP_SSH_USER }}
           jump_ssh_private_key: ${{ secrets.JUMP_SSH_PRIVATE_KEY }}

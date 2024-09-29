@@ -64,20 +64,20 @@ jobs:
       - name: Deploy Application via SSH
         uses: falling42/ssh-deploy@v0.1.0
         with:
-          use_screen: "yes" #默认 no 不需要不填即可
+          use_screen: 'yes' #默认 no 不需要不填即可
           ssh_host: ${{ secrets.SSH_HOST }}
           ssh_user: ${{ secrets.SSH_USER }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_port: 23456 # 默认22，可不填
-          use_jump_host: "no" # 默认为no，不需要不填即可
-          transfer_files: "yes" # 默认为yes，也即必须传输文件，不然你用这个action干什么 :)
-          source_file_path: "./build/app.jar" # 上游job构建出的工件
-          destination_path: "/var/www/app/" # 请确保远程服务器有此目录
-          execute_remote_script: "yes" # 必须开启此项下面所有参数才有效
-          copy_script: "yes" # 不开启此项需要你的远程服务器存在deploy_script文件
-          source_script: "scripts/deploy.sh" # 需要你的仓库存在这个文件
-          deploy_script: "/var/www/scripts/deploy.sh" # 当不开启copy_script时请注意填入的文件需要存在，否则请注意每次运行action都会覆盖这个文件
-          service_name: "my-app" # 直接写/填入你的上游变量，是否填入此项取决于你的deploy.sh是否需要此参数
+          use_jump_host: 'no' # 默认为no，不需要不填即可
+          transfer_files: 'yes' # 默认为yes，也即必须传输文件，不然你用这个action干什么 :)
+          source_file_path: './build/app.jar' # 上游job构建出的工件
+          destination_path: '/var/www/app/' # 请确保远程服务器有此目录
+          execute_remote_script: 'yes' # 必须开启此项下面所有参数才有效
+          copy_script: 'yes' # 不开启此项需要你的远程服务器存在deploy_script文件
+          source_script: 'scripts/deploy.sh' # 需要你的仓库存在这个文件
+          deploy_script: '/var/www/scripts/deploy.sh' # 当不开启copy_script时请注意填入的文件需要存在，否则请注意每次运行action都会覆盖这个文件
+          service_name: 'my-app' # 直接写/填入你的上游变量，是否填入此项取决于你的deploy.sh是否需要此参数
           service_version: ${{ steps.meta.outputs.version }} # 填入你的上游变量，是否填入此项取决于你的deploy.sh是否需要此参数
 ```
 
@@ -89,7 +89,7 @@ jobs:
       - name: Deploy Application via SSH with Jump Host
         uses: falling42/ssh-deploy@v0.1.0
         with:
-          use_jump_host: "yes"
+          use_jump_host: 'yes'
           jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
           jump_ssh_user: ${{ secrets.JUMP_SSH_USER }}
           jump_ssh_private_key: ${{ secrets.JUMP_SSH_PRIVATE_KEY }}
