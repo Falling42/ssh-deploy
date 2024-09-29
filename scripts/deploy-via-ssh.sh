@@ -21,6 +21,55 @@ DESTINATION_PATH="${DESTINATION_PATH:-}"
 SERVICE_NAME="${SERVICE_NAME:-}"
 SERVICE_VERSION="${SERVICE_VERSION:-}"
 
+# 检测系统并安装 uuidgen
+install_uuidgen() {
+  if command -v uuidgen &> /dev/null; then
+    echo "uuidgen is already installed."
+    return 0  # 退出安装函数，表示已安装
+  fi
+  echo "uuidgen is not installed. Installing..."
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if command -v apt-get &> /dev/null; then
+      echo "Detected Debian/Ubuntu. Installing uuidgen..."
+      sudo apt-get update
+      sudo apt-get install -y uuid-runtime
+    elif command -v yum &> /dev/null; then
+      echo "Detected CentOS/RedHat/Fedora. Installing uuidgen..."
+      sudo yum install -y util-linux
+    elif command -v dnf &> /dev/null; then
+      echo "Detected Fedora (dnf). Installing uuidgen..."
+      sudo dnf install -y util-linux
+    elif command -v pacman &> /dev/null; then
+      echo "Detected Arch Linux. Installing uuidgen..."
+      sudo pacman -S util-linux
+    else
+      echo "Unsupported Linux distribution. Please install uuidgen manually."
+      exit 1
+    fi
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    if command -v uuidgen &> /dev/null; then
+      echo "uuidgen is already installed on macOS."
+    else
+      echo "Installing uuidgen on macOS..."
+      if ! command -v brew &> /dev/null; then
+        echo "Homebrew is not installed. Installing Homebrew first..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      fi
+      echo "Installing uuidgen via Homebrew..."
+      brew install coreutils
+    fi
+  else
+    echo "Unsupported OS. Please install uuidgen manually."
+    exit 1
+  fi
+  if command -v uuidgen &> /dev/null; then
+    echo "uuidgen installation successful."
+  else
+    echo "uuidgen installation failed."
+    exit 1
+  fi
+}
+
 # 检查必需参数是否为空
 check_param() {
   local param_value=$1
@@ -90,23 +139,35 @@ transfer_files() {
 
 # 检查并安装 screen
 check_and_install_screen() {
-  echo "Checking if 'screen' is installed on remote host..."
-  if ! eval "ssh remote command -v screen"; then
-    echo "'screen' is not installed, installing now..."
-    local install_cmd="if command -v apt-get >/dev/null; then sudo apt-get update && sudo apt-get install -y screen; elif command -v yum >/dev/null; then sudo yum install -y screen; else echo 'Error: Unable to install screen. Please install it manually.'; exit 1; fi"
-    eval "ssh remote \"$install_cmd\" || { echo 'Error: Failed to install screen on the remote server.'; exit 1; }"
+  echo "Checking if 'screen' is installed on the remote host..."
+  if ssh remote "command -v screen &>/dev/null"; then
+    echo "'screen' is already installed on the remote host."
   else
-    echo "'screen' is already installed."
+    echo "'screen' is not installed. Attempting to install..."
+    ssh remote "if command -v apt-get &>/dev/null; then
+                   sudo apt-get update && sudo apt-get install -y screen;
+                 elif command -v yum &>/dev/null; then
+                   sudo yum install -y screen;
+                 elif command -v dnf &>/dev/null; then
+                   sudo dnf install -y screen;
+                 elif command -v pacman &>/dev/null; then
+                   sudo pacman -Sy screen;
+                 else
+                   echo 'Error: Unsupported package manager. Please install screen manually.';
+                   exit 1;
+                 fi" || { echo "Error: Failed to install 'screen' on the remote server."; exit 1; }
+    echo "'screen' installation completed on the remote host."
   fi
 }
 
 # 执行命令
 execute_command() {
   local command="$1"
-  local timestamp=$(date +'%Y%m%d%H%M%S')
-  local screen_name="${timestamp}"
 
   if [ "$USE_SCREEN" == "yes" ]; then
+    install_uuidgen
+    local uuid=$(uuidgen)
+    local screen_name="${uuid}"
     check_and_install_screen
     echo "Creating screen session: $screen_name"
     eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
