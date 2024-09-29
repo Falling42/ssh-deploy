@@ -104,7 +104,6 @@ runs:
         SOURCE_FILE_PATH: ${{ inputs.source_file_path }}
         DESTINATION_PATH: ${{ inputs.destination_path }}
       run: |
-        ls -la ./external-repo
-        chmod +x ./external-repo/deploy-via-ssh.sh
-        ./external-repo/deploy-via-ssh.sh
+        chmod +x ./external-repo/scripts/deploy-via-ssh.sh
+        ./external-repo/scripts/deploy-via-ssh.sh
       shell: bash
