@@ -62,7 +62,7 @@ jobs:
     steps:
       # ... other jobs ...
       - name: Deploy Application via SSH
-        uses: falling42/ssh-deploy@v0.1.0
+        uses: falling42/ssh-deploy@v0.1.17
         with:
           use_screen: 'yes' # Defaults to no, omit if not needed
           ssh_host: ${{ secrets.SSH_HOST }}
@@ -87,7 +87,7 @@ If there is network instability between GitHub's servers and your target server,
 
 ```yaml
       - name: Deploy Application via SSH with Jump Host
-        uses: falling42/ssh-deploy@v0.1.0
+        uses: falling42/ssh-deploy@v0.1.17
         with:
           use_jump_host: 'yes'
           jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
