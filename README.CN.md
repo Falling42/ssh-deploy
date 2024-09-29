@@ -62,7 +62,7 @@ jobs:
     steps:
 		# ... your other jobs ...
       - name: Deploy Application via SSH
-        uses: falling42/ssh-deploy@v0.1.17
+        uses: falling42/ssh-deploy@v0.1.18
         with:
           use_screen: 'yes' #默认 no 不需要不填即可
           ssh_host: ${{ secrets.SSH_HOST }}
@@ -87,7 +87,7 @@ jobs:
 
 ```yaml
       - name: Deploy Application via SSH with Jump Host
-        uses: falling42/ssh-deploy@v0.1.17
+        uses: falling42/ssh-deploy@v0.1.18
         with:
           use_jump_host: 'yes'
           jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
