@@ -96,7 +96,5 @@ runs:
         TRANSFER_FILES: ${{ inputs.transfer_files }}
         SOURCE_FILE_PATH: ${{ inputs.source_file_path }}
         DESTINATION_PATH: ${{ inputs.destination_path }}
-
-    - name: Run SSH Deploy Script
       run: bash scripts/deploy-via-ssh.sh
       shell: bash
