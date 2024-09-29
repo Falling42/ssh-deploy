@@ -1,5 +1,8 @@
 name: 'SSH Deploy By Falling42'
 description: 'Deploys application using SSH'
+branding:
+  icon: 'terminal'
+  color: 'gray-dark'
 inputs:
   jump_ssh_host:
     description: 'Jump SSH Host'
