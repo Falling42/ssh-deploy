@@ -75,6 +75,9 @@ runs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
+    - name: List files in the current directory
+      run: ls -la
+
     - name: Run SSH Deploy Script with environment variables
       env:
         USE_SCREEN: ${{ inputs.use_screen }}
