@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 # 从环境变量中读取值
 USE_SCREEN="${USE_SCREEN:-no}"
