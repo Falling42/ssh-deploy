@@ -78,10 +78,6 @@ runs:
         repository: falling42/ssh-deploy
         path: external-repo  # 将脚本检出到一个子目录
 
-    - name: List files in the current directory
-      run: ls -la
-      shell: bash
-
     - name: Run SSH Deploy Script with environment variables
       env:
         USE_SCREEN: ${{ inputs.use_screen }}
