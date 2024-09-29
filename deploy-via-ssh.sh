@@ -188,6 +188,7 @@ setup_ssh(){
     check_param "$JUMP_SSH_USER" "Jump SSH user"
     check_param "$JUMP_SSH_PRIVATE_KEY" "Jump SSH private key"
     setup_ssh_key "$JUMP_SSH_PRIVATE_KEY" ~/.ssh/jump.key
+    setup_ssh_key "$SSH_PRIVATE_KEY" ~/.ssh/remote.key
     setup_ssh_config "jump" "$JUMP_SSH_HOST" "$JUMP_SSH_USER" "~/.ssh/jump.key" "$JUMP_SSH_PORT"  ""
     setup_ssh_config "remote" "$SSH_HOST" "$SSH_USER" "~/.ssh/remote.key" "$SSH_PORT"  "ProxyJump jump"
   else
