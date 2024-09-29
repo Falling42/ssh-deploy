@@ -195,6 +195,7 @@ setup_ssh(){
     setup_ssh_config "remote" "$SSH_HOST" "$SSH_USER" "~/.ssh/remote.key" "$SSH_PORT"  ""
   fi
   chmod 600 ~/.ssh/config
+  ls -al /home/runner/.ssh/
 }
 
 check_transfer_files(){
