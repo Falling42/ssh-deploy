@@ -1,4 +1,4 @@
-name: 'SSH Deploy'
+name: 'SSH Deploy By Falling42'
 description: 'Deploys application using SSH'
 inputs:
   jump_ssh_host:
