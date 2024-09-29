@@ -34,6 +34,7 @@ check_param() {
 
 ssh_init(){
   mkdir -p ~/.ssh/
+  touch ~/.ssh/config
 }
 
 # 设置 SSH 私钥
@@ -193,7 +194,8 @@ setup_ssh(){
   else
     setup_ssh_key "$SSH_PRIVATE_KEY" ~/.ssh/remote.key
     setup_ssh_config "remote" "$SSH_HOST" "$SSH_USER" "~/.ssh/remote.key" "$SSH_PORT"  ""
-  fi  
+  fi
+  chmod 600 ~/.ssh/config
 }
 
 check_transfer_files(){
