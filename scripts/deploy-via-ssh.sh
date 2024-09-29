@@ -74,11 +74,12 @@ fi
 transfer_files() {
   local source_path="$1"
   local destination_path="$2"
-  local remote_host="$3"
 
-  echo "Transferring files from ${source_path} to ${remote_host}:${destination_path}..."
-  scp "${source_path}" "${remote_host}:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
-  echo "File transfer to ${remote_host} completed successfully."
+  ensure_directory_exists "$destination_path"
+  echo "Transferring files from ${source_path} to remote:${destination_path}..."
+  scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
+  echo "File transfer to remote server completed successfully."
+  set_file_permissions "$destination_path"
 }
 
 # 检查并安装 screen
@@ -115,9 +116,22 @@ execute_command_with_screen() {
 # 确保远程目录存在
 ensure_directory_exists() {
   local remote_dir_path="$1"
-  echo "Ensuring directory ${remote_dir_path} exists on remote host..."
-  execute_command_with_screen "sudo mkdir -p ${remote_dir_path}" || { echo "Error: Failed to ensure directory ${remote_dir_path} exists."; exit 1; }
-  echo "Directory ${remote_dir_path} exists successfully."
+  echo "Checking if directory ${remote_dir_path} exists on remote host..."
+
+  # 检查远程目录是否存在
+  if ! execute_command_with_screen "[ -d ${remote_dir_path} ]"; then
+    echo "Directory ${remote_dir_path} does not exist. Creating it..."
+    
+    # 如果不存在，则创建目录
+    if ! execute_command_with_screen "sudo mkdir -p ${remote_dir_path}"; then
+      echo "Error: Failed to create directory ${remote_dir_path}."
+      exit 1
+    fi
+
+    echo "Directory ${remote_dir_path} created successfully."
+  else
+    echo "Directory ${remote_dir_path} already exists."
+  fi
 }
 
 # 为远程文件设置权限
@@ -200,6 +214,7 @@ check_execute_deployment(){
 
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
+      ensure_directory_exists "$(dirname "$DEPLOY_SCRIPT")"
       # 复制脚本
       transfer_files "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT" "remote"
     fi
