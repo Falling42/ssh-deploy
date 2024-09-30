@@ -125,18 +125,6 @@ else
 fi
 }
 
-# 传输文件
-transfer_files() {
-  local source_path="$1"
-  local destination_path="$2"
-
-  ensure_directory_exists "$destination_path"
-  echo "Transferring files from ${source_path} to remote:${destination_path}..."
-  scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
-  echo "File transfer to remote server completed successfully."
-  set_file_permissions "$destination_path"
-}
-
 # 检查并安装 screen
 check_and_install_screen() {
   echo "Checking if 'screen' is installed on the remote host..."
@@ -195,6 +183,18 @@ ensure_directory_exists() {
   else
     echo "Directory ${remote_dir_path} already exists."
   fi
+}
+
+# 传输文件
+transfer_files() {
+  local source_path="$1"
+  local destination_path="$2"
+
+  ensure_directory_exists "$destination_path"
+  echo "Transferring files from ${source_path} to remote:${destination_path}..."
+  scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
+  echo "File transfer to remote server completed successfully."
+  set_file_permissions "$destination_path"
 }
 
 # 为远程文件设置权限
@@ -290,6 +290,7 @@ check_execute_deployment(){
 
 # 主函数
 main(){
+  echo "test"
   check_required_params
   setup_ssh
   check_transfer_files
