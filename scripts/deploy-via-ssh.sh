@@ -258,6 +258,7 @@ check_transfer_files(){
     check_param "$SOURCE_FILE_PATH" "Source file path"
     check_param "$DESTINATION_PATH" "Destination path"
     transfer_files "$SOURCE_FILE_PATH" "$DESTINATION_PATH" "remote"
+    set_file_permissions "$DESTINATION_PATH" 
   else
     echo "Skipping transfer files as per configuration."
   fi    
@@ -273,7 +274,6 @@ check_execute_deployment(){
       check_param "$SOURCE_SCRIPT" "Source script"
       dirname "$DEPLOY_SCRIPT"
       dir="$(dirname "$DEPLOY_SCRIPT")"
-      ensure_directory_exists "${dir}"
       transfer_files "$SOURCE_SCRIPT" "${dir}" "remote"
     fi
 
