@@ -274,8 +274,10 @@ check_execute_deployment(){
 
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
-      ensure_directory_exists "$(dirname "$DEPLOY_SCRIPT")"
-      transfer_files "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT" "remote"
+      dirname "$DEPLOY_SCRIPT"
+      dir="$(dirname "$DEPLOY_SCRIPT")"
+      ensure_directory_exists "${dir}"
+      transfer_files "$SOURCE_SCRIPT" "${dir}" "remote"
     fi
 
     set_file_permissions "$DEPLOY_SCRIPT" 
