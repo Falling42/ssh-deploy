@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 
+# 定义颜色
+RED="\033[31m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+BLUE="\033[34m"
+MAGENTA="\033[35m"
+CYAN="\033[36m"
+RESET="\033[0m"
+
+# 输出带颜色的信息
+log_info() {
+  echo -e "${CYAN}$1${RESET}"
+}
+
+log_success() {
+  echo -e "${GREEN}$1${RESET}"
+}
+
+log_error() {
+  echo -e "${RED}$1${RESET}"
+}
+
+log_warning() {
+  echo -e "${YELLOW}$1${RESET}"
+}
+
 # 从环境变量中读取值
 USE_SCREEN="${USE_SCREEN:-no}"
 USE_JUMP_HOST="${USE_JUMP_HOST:-no}"
@@ -24,48 +50,48 @@ SERVICE_VERSION="${SERVICE_VERSION:-}"
 # 检测系统并安装 uuidgen
 install_uuidgen() {
   if command -v uuidgen &> /dev/null; then
-    echo "uuidgen is already installed on this server."
+    log_success "uuidgen is already installed on this server."
     return 0  # 退出安装函数，表示已安装
   fi
-  echo "uuidgen is not installed on this server. Installing..."
+  log_warning "uuidgen is not installed on this server. Installing..."
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if command -v apt-get &> /dev/null; then
-      echo "Detected Debian/Ubuntu. Installing uuidgen..."
+      log_info "Detected Debian/Ubuntu. Installing uuidgen..."
       sudo apt-get update
       sudo apt-get install -y uuid-runtime
     elif command -v yum &> /dev/null; then
-      echo "Detected CentOS/RedHat/Fedora. Installing uuidgen..."
+      log_info "Detected CentOS/RedHat/Fedora. Installing uuidgen..."
       sudo yum install -y util-linux
     elif command -v dnf &> /dev/null; then
-      echo "Detected Fedora (dnf). Installing uuidgen..."
+      log_info "Detected Fedora (dnf). Installing uuidgen..."
       sudo dnf install -y util-linux
     elif command -v pacman &> /dev/null; then
-      echo "Detected Arch Linux. Installing uuidgen..."
+      log_info "Detected Arch Linux. Installing uuidgen..."
       sudo pacman -S util-linux
     else
-      echo "Unsupported Linux distribution. Please install uuidgen manually."
+      log_error "Unsupported Linux distribution. Please install uuidgen manually."
       exit 1
     fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     if command -v uuidgen &> /dev/null; then
-      echo "uuidgen is already installed on macOS."
+      log_success "uuidgen is already installed on macOS."
     else
-      echo "Installing uuidgen on macOS..."
+      log_warning "Installing uuidgen on macOS..."
       if ! command -v brew &> /dev/null; then
-        echo "Homebrew is not installed. Installing Homebrew first..."
+        log_info "Homebrew is not installed. Installing Homebrew first..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       fi
-      echo "Installing uuidgen via Homebrew..."
+      log_info "Installing uuidgen via Homebrew..."
       brew install coreutils
     fi
   else
-    echo "Unsupported OS. Please install uuidgen manually."
+    log_error "Unsupported OS. Please install uuidgen manually."
     exit 1
   fi
   if command -v uuidgen &> /dev/null; then
-    echo "uuidgen installation successful."
+    log_success "uuidgen installation successful."
   else
-    echo "uuidgen installation failed."
+    log_error "uuidgen installation failed."
     exit 1
   fi
 }
@@ -76,10 +102,10 @@ check_param() {
   local param_name=$2
 
   if [ -z "$param_value" ]; then
-    echo "Error: $param_name is missing."
+    log_error "Error: $param_name is missing."
     exit 1
   else
-    echo "$param_name is $param_value."
+    log_info "$param_name is ${BLUE}$param_value${RESET}."
   fi
 }
 
@@ -94,8 +120,8 @@ setup_ssh_key() {
   local key_path="$2"
   
   echo "${ssh_key}" > "${key_path}"
-  chmod 600 "${key_path}" || { echo "Error: Failed to set permissions for ${key_path}."; exit 1; }
-  [ ! -f "${key_path}" ] && { echo "Error: Failed to write SSH private key at ${key_path}."; exit 1; }
+  chmod 600 "${key_path}" || { log_error "Error: Failed to set permissions for ${key_path}."; exit 1; }
+  [ ! -f "${key_path}" ] && { log_error "Error: Failed to write SSH private key at ${key_path}."; exit 1; }
 }
 
 # 设置 SSH 配置文件
@@ -107,9 +133,9 @@ setup_ssh_config() {
   local ssh_port="${5:-22}"
   local proxy_jump="$6"
 
-if ! grep -q "Host $host_name" ~/.ssh/config; then
-  echo "Writing SSH configuration for $host_name"
-  cat >>~/.ssh/config <<END
+  if ! grep -q "Host $host_name" ~/.ssh/config; then
+    log_info "Writing SSH configuration for $host_name"
+    cat >>~/.ssh/config <<END
 Host ${host_name}
   HostName ${ssh_host}
   User ${ssh_user}
@@ -120,18 +146,18 @@ Host ${host_name}
   ServerAliveCountMax 3
   ${proxy_jump}
 END
-else
-  echo "SSH configuration for $host_name already exists."
-fi
+  else
+    log_info "SSH configuration for $host_name already exists."
+  fi
 }
 
 # 检查并安装 screen
 check_and_install_screen() {
-  echo "Checking if 'screen' is installed on the remote host..."
+  log_info "Checking if 'screen' is installed on the remote host..."
   if ssh remote "command -v screen &>/dev/null"; then
-    echo "'screen' is already installed on the remote host."
+    log_success "'screen' is already installed on the remote host."
   else
-    echo "'screen' is not installed. Attempting to install..."
+    log_warning "'screen' is not installed. Attempting to install..."
     ssh remote "if command -v apt-get &>/dev/null; then
                    sudo apt-get update && sudo apt-get install -y screen;
                  elif command -v yum &>/dev/null; then
@@ -143,8 +169,8 @@ check_and_install_screen() {
                  else
                    echo 'Error: Unsupported package manager. Please install screen manually.';
                    exit 1;
-                 fi" || { echo "Error: Failed to install 'screen' on the remote server."; exit 1; }
-    echo "'screen' installation completed on the remote host."
+                 fi" || { log_error "Error: Failed to install 'screen' on the remote server."; exit 1; }
+    log_success "'screen' installation completed on the remote host."
   fi
 }
 
@@ -156,33 +182,33 @@ execute_inscreen() {
   check_and_install_screen
   install_uuidgen
   screen_name="$screen_name$(uuidgen)"
-  echo "Creating screen session: $screen_name"
-  eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
-  echo "Executing command in screen: $command"
-  eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute command in screen."; exit 1; }
-  echo "Command is executing in screen. Check the screen session for any errors."
+  log_info "Creating screen session: $screen_name"
+  eval "ssh remote sudo screen -dmS $screen_name" || { log_error "Error: Failed to create screen session."; exit 1; }
+  log_info "Executing command in screen: $command"
+  eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { log_error "Error: Failed to execute command in screen."; exit 1; }
+  log_info "Command is executing in screen. Check the screen session for any errors."
 }
 
 # 执行命令
 execute_command() {
   local command="$1"
 
-  echo "Executing command: $command"
-  eval "ssh remote \"$command\"" || { echo "Error: Failed to execute command."; exit 1; }
-  echo "Command executed successfully."
+  log_info "Executing command: $command"
+  eval "ssh remote \"$command\"" || { log_error "Error: Failed to execute command."; exit 1; }
+  log_success "Command executed successfully."
 }
 
 # 确保远程目录存在
 ensure_directory_exists() {
   local remote_dir_path="$1"
   
-  echo "Checking if directory ${remote_dir_path} exists on remote host..."
+  log_info "Checking if directory ${remote_dir_path} exists on remote host..."
   if ! ssh remote "[ -d ${remote_dir_path} ]"; then
-    echo "Directory ${remote_dir_path} does not exist. Creating it..."
-    execute_command "sudo mkdir -p ${remote_dir_path}" || { echo "Error: Failed to create directory ${remote_dir_path}."; exit 1; }
-    echo "Directory ${remote_dir_path} created successfully."
+    log_warning "Directory ${remote_dir_path} does not exist. Creating it..."
+    execute_command "sudo mkdir -p ${remote_dir_path}" || { log_error "Error: Failed to create directory ${remote_dir_path}."; exit 1; }
+    log_success "Directory ${remote_dir_path} created successfully."
   else
-    echo "Directory ${remote_dir_path} already exists."
+    log_success "Directory ${remote_dir_path} already exists."
   fi
 }
 
@@ -192,9 +218,9 @@ transfer_files() {
   local destination_path="$2"
 
   ensure_directory_exists "$destination_path"
-  echo "Transferring files from ${source_path} to remote:${destination_path}..."
-  scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
-  echo "File transfer to remote server completed successfully."
+  log_info "Transferring files from ${source_path} to remote:${destination_path}..."
+  scp "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to ${remote_host} failed."; exit 1; }
+  log_success "File transfer to remote server completed successfully."
   set_dir_permissions "$destination_path"
 }
 
@@ -206,9 +232,9 @@ set_dir_permissions() {
   if [ -z "$permissions" ]; then
     permissions="755"
   fi
-  echo "Setting file permissions for ${remote_dir} on remote host..."
-  execute_command "sudo chmod -R ${permissions} ${remote_dir}" || { echo "Error: Failed to set file permissions for ${remote_dir}."; exit 1; }
-  echo "Directory permissions for ${remote_dir} set to ${permissions} successfully."
+  log_info "Setting file permissions for ${remote_dir} on remote host..."
+  execute_command "sudo chmod -R ${permissions} ${remote_dir}" || { log_error "Error: Failed to set file permissions for ${remote_dir}."; exit 1; }
+  log_success "Directory permissions for ${remote_dir} set to ${permissions} successfully."
 }
 
 # 为文件设置权限
@@ -219,9 +245,9 @@ set_file_permissions() {
   if [ -z "$permissions" ]; then
     permissions="755"
   fi
-  echo "Setting file permissions for ${remote_file_path} on remote host..."
-  execute_command "sudo chmod ${permissions} ${remote_file_path}" || { echo "Error: Failed to set file permissions for ${remote_file_path}."; exit 1; }
-  echo "File permissions for ${remote_file_path} set to ${permissions} successfully."
+  log_info "Setting file permissions for ${remote_file_path} on remote host..."
+  execute_command "sudo chmod ${permissions} ${remote_file_path}" || { log_error "Error: Failed to set file permissions for ${remote_file_path}."; exit 1; }
+  log_success "File permissions for ${remote_file_path} set to ${permissions} successfully."
 }
 
 # 执行远程部署
@@ -237,7 +263,7 @@ execute_deployment() {
  else
     execute_command "$command"
   fi
-  echo "Deployment executed successfully."
+  log_success "Deployment executed successfully."
 }
 
 # 检查必需的参数
@@ -277,7 +303,7 @@ check_transfer_files(){
     check_param "$DESTINATION_PATH" "Destination path"
     transfer_files "$SOURCE_FILE_PATH" "$DESTINATION_PATH" "remote"
   else
-    echo "Skipping transfer files as per configuration."
+    log_info "Skipping file transfer as per configuration."
   fi    
 }
 
@@ -297,13 +323,13 @@ check_execute_deployment(){
     set_file_permissions "$DEPLOY_SCRIPT" 
     execute_deployment "$DEPLOY_SCRIPT" "$SERVICE_NAME" "$SERVICE_VERSION"
   else
-    echo "Skipping remote script execution as per configuration."
+    log_info "Skipping remote script execution as per configuration."
   fi  
 }
 
 # 主函数
 main(){
-  echo "Script Version: v0.1.23"
+  log_info "Script Version: ${MAGENTA}v0.1.23${RESET}"
   check_required_params
   setup_ssh
   check_transfer_files
