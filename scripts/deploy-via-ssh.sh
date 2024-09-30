@@ -148,23 +148,29 @@ check_and_install_screen() {
   fi
 }
 
+# 在screen里执行命令
+execute_inscreen() {
+  local command="$1"
+  local screen_name="${2:-}"
+
+  check_and_install_screen
+  if [ -z "$screen_name" ]; then
+    install_uuidgen
+    screen_name="$(uuidgen)"
+  fi 
+  echo "Creating screen session: $screen_name"
+  eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
+  echo "Executing command in screen: $command"
+  eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute command in screen."; exit 1; }
+  echo "Command is executing in screen. Check the screen session for any errors."
+}
+
 # 执行命令
 execute_command() {
   local command="$1"
 
-  # if [ "$USE_SCREEN" == "yes" ]; then
-  #   install_uuidgen
-  #   local uuid=$(uuidgen)
-  #   local screen_name="${uuid}"
-  #   check_and_install_screen
-  #   echo "Creating screen session: $screen_name"
-  #   eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
-  #   echo "Executing command in screen: $command"
-  #   eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute command in screen."; exit 1; }
-  # else
-    echo "Executing command directly: $command"
-    eval "ssh remote \"$command\"" || { echo "Error: Failed to execute command directly."; exit 1; }
-  #fi
+  echo "Executing command: $command"
+  eval "ssh remote \"$command\"" || { echo "Error: Failed to execute command."; exit 1; }
   echo "Command executed successfully."
 }
 
@@ -187,7 +193,6 @@ transfer_files() {
   local source_path="$1"
   local destination_path="$2"
 
-  echo "check"
   ensure_directory_exists "$destination_path"
   echo "Transferring files from ${source_path} to remote:${destination_path}..."
   scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
@@ -213,14 +218,9 @@ execute_deployment() {
   local command="sudo ${deploy_script} ${service_name} ${service_version}"
 
   if [ "$USE_SCREEN" == "yes" ]; then
-    check_and_install_screen
-    echo "Creating screen session for deployment: $screen_name"
-    eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session for deployment."; exit 1; }
-    echo "Executing deployment command in screen: $command"
-    eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute deployment command in screen."; exit 1; }
-  else
-    echo "Executing deployment command directly: $command"
-    eval "ssh remote \"$command\"" || { echo "Error: Failed to execute deployment command directly."; exit 1; }
+    execute_inscreen "$command" "$screen_name"
+ else
+    execute_command "$command"
   fi
   echo "Deployment executed successfully."
 }
@@ -253,7 +253,6 @@ setup_ssh(){
     setup_ssh_config "remote" "$SSH_HOST" "$SSH_USER" "~/.ssh/remote.key" "$SSH_PORT"  ""
   fi
   chmod 600 ~/.ssh/config
-  ls -al /home/runner/.ssh/
 }
 
 # 处理文件传输
