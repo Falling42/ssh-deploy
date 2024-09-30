@@ -133,7 +133,7 @@ setup_ssh_config() {
   local ssh_port="${5:-22}"
   local proxy_jump="$6"
 
-  if ! grep -q "Host $host_name" ~/.ssh/config; then
+  if ! grep -q "Host $host_name" ~/.ssh/config 2>/dev/null; then
     log_info "Writing SSH configuration for $host_name"
     cat >>~/.ssh/config <<END
 Host ${host_name}
@@ -315,7 +315,6 @@ check_execute_deployment(){
 
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
-      dirname "$DEPLOY_SCRIPT"
       dir="$(dirname "$DEPLOY_SCRIPT")"
       transfer_files "$SOURCE_SCRIPT" "${dir}" "remote"
     fi
