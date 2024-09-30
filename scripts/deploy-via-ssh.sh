@@ -190,6 +190,7 @@ transfer_files() {
   local source_path="$1"
   local destination_path="$2"
 
+  echo "check"
   ensure_directory_exists "$destination_path"
   echo "Transferring files from ${source_path} to remote:${destination_path}..."
   scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
