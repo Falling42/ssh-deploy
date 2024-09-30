@@ -24,10 +24,10 @@ SERVICE_VERSION="${SERVICE_VERSION:-}"
 # 检测系统并安装 uuidgen
 install_uuidgen() {
   if command -v uuidgen &> /dev/null; then
-    echo "uuidgen is already installed."
+    echo "uuidgen is already installed on this server."
     return 0  # 退出安装函数，表示已安装
   fi
-  echo "uuidgen is not installed. Installing..."
+  echo "uuidgen is not installed on this server. Installing..."
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if command -v apt-get &> /dev/null; then
       echo "Detected Debian/Ubuntu. Installing uuidgen..."
