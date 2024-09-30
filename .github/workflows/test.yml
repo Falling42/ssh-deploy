@@ -8,6 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: falling42/ssh-deploy
       - name: Deploy Application via SSH
         uses: falling42/ssh-deploy@v0.1.20
         with:
