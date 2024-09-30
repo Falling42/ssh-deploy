@@ -13,7 +13,7 @@ jobs:
         with:
           repository: falling42/ssh-deploy
       - name: Deploy Application via SSH
-        uses: falling42/ssh-deploy@v0.1.24
+        uses: falling42/ssh-deploy@v0.1.25
         with:
           use_screen: 'yes' # Defaults to no, omit if not needed
           use_jump_host: 'yes' # Defaults to no, omit if not needed
