@@ -170,12 +170,12 @@ execute_command() {
     local screen_name="${uuid}"
     check_and_install_screen
     echo "Creating screen session: $screen_name"
-    eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
+    ssh remote sudo screen -dmS "$screen_name" || { echo "Error: Failed to create screen session."; exit 1; }
     echo "Executing command in screen: $command"
-    eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute command in screen."; exit 1; }
+    ssh remote sudo screen -S "$screen_name" -X stuff "$command && exit\n" || { echo "Error: Failed to execute command in screen."; exit 1; }
   else
     echo "Executing command directly: $command"
-    eval "ssh remote \"$command\"" || { echo "Error: Failed to execute command directly."; exit 1; }
+    ssh remote "$command" || { echo "Error: Failed to execute command directly."; exit 1; }
   fi
   echo "Command executed successfully."
 }
@@ -217,12 +217,12 @@ execute_deployment() {
   if [ "$USE_SCREEN" == "yes" ]; then
     check_and_install_screen
     echo "Creating screen session for deployment: $screen_name"
-    eval "ssh remote sudo screen -dmS $screen_name" || { echo "Error: Failed to create screen session for deployment."; exit 1; }
+    ssh remote sudo screen -dmS "$screen_name" || { echo "Error: Failed to create screen session for deployment."; exit 1; }
     echo "Executing deployment command in screen: $command"
-    eval "ssh remote sudo screen -S $screen_name -X stuff \"\$'$command && exit\n'\"" || { echo "Error: Failed to execute deployment command in screen."; exit 1; }
+    ssh remote sudo screen -S "$screen_name" -X stuff "$command && exit\n" || { echo "Error: Failed to execute deployment command in screen."; exit 1; }
   else
     echo "Executing deployment command directly: $command"
-    eval "ssh remote \"$command\"" || { echo "Error: Failed to execute deployment command directly."; exit 1; }
+    ssh remote "$command" || { echo "Error: Failed to execute deployment command directly."; exit 1; }
   fi
   echo "Deployment executed successfully."
 }
