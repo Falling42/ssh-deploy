@@ -142,6 +142,7 @@ Host ${host_name}
   Port ${ssh_port}
   IdentityFile ${ssh_key}
   StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
   ServerAliveInterval 60
   ServerAliveCountMax 3
   ${proxy_jump}
