@@ -101,14 +101,17 @@ If there is network instability between GitHub's servers and your target server,
 
 It is recommended to store sensitive information such as SSH keys and host details in GitHub Secrets. You can configure secrets in your repository's settings (**Settings** > **Secrets and Variables** > **Actions**). The following secrets are recommended:
 
-| Secret Name            | Description                                          |
-| ---------------------- | ---------------------------------------------------- |
-| `JUMP_SSH_HOST`        | The SSH host IP or domain name of the jump host.     |
-| `JUMP_SSH_USER`        | The SSH username for the jump host.                  |
-| `JUMP_SSH_PRIVATE_KEY` | The SSH private key for the jump host.               |
-| `SSH_HOST`             | The SSH host IP or domain name of the target server. |
-| `SSH_USER`             | The SSH username for the target server.              |
-| `SSH_PRIVATE_KEY`      | The SSH private key for the target server.           |
+| Secret Name            | Description                                                   | 
+| ---------------------- | ------------------------------------------------------------- |
+| `JUMP_SSH_HOST`        | SSH host IP or domain of the jump host.                        |
+| `JUMP_SSH_USER`        | SSH username for the jump host.                               |
+| `JUMP_SSH_PRIVATE_KEY` | SSH private key for the jump host, used for authentication.    |
+| `JUMP_SSH_PORT`        | SSH port for the jump host, if you don't want your custom port to be visible to others. |
+| `SSH_HOST`             | SSH host IP or domain of the target deployment server.         |
+| `SSH_USER`             | SSH username for the target deployment server.                |
+| `SSH_PRIVATE_KEY`      | SSH private key for the target deployment server, used for authentication. |
+| `SSH_PORT`             | SSH port for the target deployment server, if you don't want your custom port to be visible to others. |
+| `DEPLOY_SCRIPT`        | Full path to the deployment script on the target server, if you don't want it to be visible to others. |
 
 ## Outputs
 

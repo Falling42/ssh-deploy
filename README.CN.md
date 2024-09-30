@@ -2,7 +2,7 @@
 
  [English](README.md) | [简体中文](README.CN.md)
 
-**Deploy via SSH ** 是一个通过 SSH 部署应用的 GitHub Action。它支持文件传输、执行远程脚本，并可以使用跳板机进行安全的 SSH 连接。
+**Deploy via SSH** 是一个通过 SSH 部署应用的 GitHub Action。它支持文件传输、执行远程脚本，并可以使用跳板机进行安全的 SSH 连接。
 
 ## 功能特点
 
@@ -60,7 +60,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-		# ... your other jobs ...
+      # ... your other jobs ...
       - name: Deploy Application via SSH
         uses: falling42/ssh-deploy@v0.1.18
         with:
