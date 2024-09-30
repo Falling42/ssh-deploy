@@ -173,7 +173,7 @@ ensure_directory_exists() {
   local remote_dir_path="$1"
   
   echo "Checking if directory ${remote_dir_path} exists on remote host..."
-  if ! execute_command "[ -d ${remote_dir_path} ]"; then
+  if ! ssh remote "[ -d ${remote_dir_path} ]"; then
     echo "Directory ${remote_dir_path} does not exist. Creating it..."
     execute_command "sudo mkdir -p ${remote_dir_path}" || { echo "Error: Failed to create directory ${remote_dir_path}."; exit 1; }
     echo "Directory ${remote_dir_path} created successfully."
