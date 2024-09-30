@@ -328,7 +328,7 @@ check_execute_deployment(){
 
 # 主函数
 main(){
-  log_info "Script Version: ${MAGENTA}v0.1.24${RESET}"
+  log_info "Script Version: ${MAGENTA}v0.1.25${RESET}"
   check_required_params
   setup_ssh
   check_transfer_files
