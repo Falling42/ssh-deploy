@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Application via SSH
-        uses: falling42/ssh-deploy@v0.1.19
+        uses: falling42/ssh-deploy@v0.1.18
         with:
           use_screen: 'yes' # Defaults to no, omit if not needed
           use_jump_host: 'yes' # Defaults to no, omit if not needed
