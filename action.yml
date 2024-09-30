@@ -76,7 +76,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: falling42/ssh-deploy
-        ref: refs/tags/v0.1.22
+        ref: refs/tags/v0.1.23
         path: external-repo  # 将脚本检出到一个子目录
 
     - name: Run SSH Deploy Script with environment variables

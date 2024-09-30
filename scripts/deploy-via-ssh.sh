@@ -195,15 +195,33 @@ transfer_files() {
   echo "Transferring files from ${source_path} to remote:${destination_path}..."
   scp "${source_path}" "remote:${destination_path}" || { echo "Error: File transfer to ${remote_host} failed."; exit 1; }
   echo "File transfer to remote server completed successfully."
-  set_file_permissions "$destination_path"
+  set_dir_permissions "$destination_path"
 }
 
-# 为远程文件设置权限
+# 为目录设置权限
+set_dir_permissions() {
+  local remote_dir="$1"
+  local permissions="${2:-}"
+  
+  if [ -z "$permissions" ]; then
+    permissions="755"
+  fi
+  echo "Setting file permissions for ${remote_dir} on remote host..."
+  execute_command "sudo chmod -R ${permissions} ${remote_dir}" || { echo "Error: Failed to set file permissions for ${remote_dir}."; exit 1; }
+  echo "Directory permissions for ${remote_dir} set to ${permissions} successfully."
+}
+
+# 为文件设置权限
 set_file_permissions() {
   local remote_file_path="$1"
+  local permissions="${2:-}"
+  
+  if [ -z "$permissions" ]; then
+    permissions="755"
+  fi
   echo "Setting file permissions for ${remote_file_path} on remote host..."
-  execute_command "sudo chmod -R 755 ${remote_file_path}" || { echo "Error: Failed to set file permissions for ${remote_file_path}."; exit 1; }
-  echo "File permissions for ${remote_file_path} set to 755 successfully."
+  execute_command "sudo chmod ${permissions} ${remote_file_path}" || { echo "Error: Failed to set file permissions for ${remote_file_path}."; exit 1; }
+  echo "File permissions for ${remote_file_path} set to ${permissions} successfully."
 }
 
 # 执行远程部署
@@ -258,7 +276,6 @@ check_transfer_files(){
     check_param "$SOURCE_FILE_PATH" "Source file path"
     check_param "$DESTINATION_PATH" "Destination path"
     transfer_files "$SOURCE_FILE_PATH" "$DESTINATION_PATH" "remote"
-    set_file_permissions "$DESTINATION_PATH" 
   else
     echo "Skipping transfer files as per configuration."
   fi    
@@ -286,7 +303,7 @@ check_execute_deployment(){
 
 # 主函数
 main(){
-  echo "v0.1.22"
+  echo "Script Version: v0.1.23"
   check_required_params
   setup_ssh
   check_transfer_files
