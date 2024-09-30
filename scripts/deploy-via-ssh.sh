@@ -286,7 +286,7 @@ check_execute_deployment(){
 
 # 主函数
 main(){
-  echo "v0.1.20"
+  echo "v0.1.22"
   check_required_params
   setup_ssh
   check_transfer_files
