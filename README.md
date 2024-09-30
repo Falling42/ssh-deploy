@@ -99,7 +99,7 @@ If there is network instability between GitHub's servers and your target server,
 
 ### Using Secrets
 
-It is recommended to store sensitive information such as SSH keys and host details in GitHub Secrets. You can configure secrets in your repository's settings (**Settings** > **Secrets and Variables** > **Actions**). The following secrets are recommended:
+It is recommended to store sensitive information such as SSH keys and host details in GitHub Secrets. You can configure secrets in your repository's settings (**Settings** > **Secrets and Variables** > **Actions** > **Repository secrets** > **New repository secret**). The following secrets are recommended:
 
 | Secret Name            | Description                                                   | 
 | ---------------------- | ------------------------------------------------------------- |

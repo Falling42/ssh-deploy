@@ -1,0 +1,32 @@
+name: Deploy to Remote Server
+
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Application via SSH
+        uses: falling42/ssh-deploy@v0.1.19
+        with:
+          use_screen: 'yes' # Defaults to no, omit if not needed
+          use_jump_host: 'yes' # Defaults to no, omit if not needed
+          jump_ssh_host: ${{ secrets.JUMP_SSH_HOST }}
+          jump_ssh_user: ${{ secrets.JUMP_SSH_USER }}
+          jump_ssh_private_key: ${{ secrets.JUMP_SSH_PRIVATE_KEY }}
+          jump_ssh_port: ${{ secrets.JUMP_SSH_PORT }} # Default is 22, omit if not needed
+          ssh_host: ${{ secrets.SSH_HOST }}
+          ssh_user: ${{ secrets.SSH_USER }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_port: ${{ secrets.SSH_PORT }} # Default is 22, omit if not needed
+          transfer_files: 'yes' # Defaults to yes, as transferring files is a core function of this action :)
+          source_file_path: './test/artifact/test' # Artifact from an upstream job
+          destination_path: '/data/test/app/' # Ensure the remote server has this directory
+          execute_remote_script: 'yes' # Enable this for the following parameters to take effect
+          copy_script: 'yes' # If disabled, the deploy_script must already exist on the remote server
+          source_script: 'test/test.sh' # Ensure this file exists in your repository
+          deploy_script: '/data/test/scripts/test.sh' # This file will be overwritten each time if copy_script is enabled
+          service_name: 'falling42-test' # Can be hardcoded or use an upstream variable
+          service_version: ${{ github.sha }} # Populate from upstream variable if needed by your deploy script

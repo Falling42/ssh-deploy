@@ -99,7 +99,7 @@ jobs:
 
 ### 使用 Secrets
 
-建议使用 GitHub Secrets 来存储敏感信息，如 SSH 密钥和主机信息。您可以在仓库的设置中配置 Secrets（**Settings** > **Secrets and Variables** > **Actions**）。以下是建议您在仓库中配置的 secrets 列表：
+建议使用 GitHub Secrets 来存储敏感信息，如 SSH 密钥和主机信息。您可以在仓库的设置中配置 Secrets（**Settings** > **Secrets and Variables** > **Actions** > **Repository secrets** > **New repository secret**）。以下是建议您在仓库中配置的 secrets 列表：
 
 | Secret 名称            | 描述                                                         |
 | ---------------------- | ------------------------------------------------------------ |
