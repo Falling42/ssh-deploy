@@ -40,7 +40,7 @@
 | `deploy_script`         | 远程服务器上部署脚本的完整路径               | 否       |        |
 | `service_name`          | 要部署的服务名称                             | 否       |        |
 | `service_version`       | 要部署的服务版本                             | 否       |        |
-| `transfer_files`        | 是否将文件传输到远程服务器 (`yes` 或 `no`)   | 否       | `yes`  |
+| `transfer_files`        | 是否将文件传输到远程服务器 (`yes` 或 `no`)   | 是       | `yes`  |
 | `source_file_path`      | 要上传的文件在仓库中的相对路径               | 否       |        |
 | `destination_path`      | 远程服务器上要传输文件的完整路径             | 否       |        |
 

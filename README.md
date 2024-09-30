@@ -40,7 +40,7 @@ Before using this action, ensure that:
 | `deploy_script`         | The full path to the deployment script on the remote server  | No       |         |
 | `service_name`          | The name of the service to deploy                            | No       |         |
 | `service_version`       | The version of the service to deploy                         | No       |         |
-| `transfer_files`        | Whether to transfer files to the remote server (`yes` or `no`) | No       | `yes`   |
+| `transfer_files`        | Whether to transfer files to the remote server (`yes` or `no`) | Yes       | `yes`   |
 | `source_file_path`      | The relative path to the file to upload from the repository  | No       |         |
 | `destination_path`      | The full path on the remote server to transfer the file to   | No       |         |
 
