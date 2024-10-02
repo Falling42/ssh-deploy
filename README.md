@@ -36,13 +36,13 @@ Before using this action, ensure that:
 | `ssh_port`              | The SSH port for the remote server (default: `22`)           | No       | `22`    |
 | `execute_remote_script` | Whether to execute a remote script (`yes` or `no`)           | No       | `no`    |
 | `copy_script`           | Whether to copy a deployment script from your repository (`yes` or `no`) | No       | `no`    |
-| `source_script`         | The relative path to the source script in your repository(including file name) | No       |         |
-| `deploy_script`         | The full path to the deployment script on the remote server(including file name) | No       |         |
+| `source_script`         | The relative path to the source script in your repository (including file name) | No       |         |
+| `deploy_script`         | The full path to the deployment script on the remote server (including file name) | No       |         |
 | `service_name`          | The name of the service to deploy                            | No       |         |
 | `service_version`       | The version of the service to deploy                         | No       |         |
 | `transfer_files`        | Whether to transfer files to the remote server (`yes` or `no`) | Yes       | `yes`   |
-| `source_file_path`      | The relative path to the file to upload from the repository(including file name) | No       |         |
-| `destination_path`      | The full path on the remote server to transfer the file to(excluding file name) | No       |         |
+| `source_file_path`      | The relative path to the file to upload from the repository (including file name) | No       |         |
+| `destination_path`      | The full path on the remote server to transfer the file to (excluding file name) | No       |         |
 
 ## Example Workflow
 
