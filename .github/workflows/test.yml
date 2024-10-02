@@ -26,8 +26,8 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_port: ${{ secrets.SSH_PORT }} # Default is 22, omit if not needed
           transfer_files: 'yes' # Defaults to yes, as transferring files is a core function of this action :)
-          source_file_path: './test/artifact/test.bin' # Artifact from an upstream job
-          destination_path: '/data/test/app/' # Ensure the remote server has this directory
+          source_file_path: './test/artifact/test' # Artifact from an upstream job
+          destination_path: '/data/test/app/test/' # Ensure the remote server has this directory
           execute_remote_script: 'yes' # Enable this for the following parameters to take effect
           copy_script: 'yes' # If disabled, the deploy_script must already exist on the remote server
           source_script: 'test/test.sh' # Ensure this file exists in your repository

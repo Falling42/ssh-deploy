@@ -213,7 +213,7 @@ ensure_directory_exists() {
 }
 
 # 为文件设置权限
-set_file_permissions() {
+set_permissions() {
   local remote_file_path="$1"
   local permissions="${2:-755}"
   
@@ -229,49 +229,109 @@ set_file_permissions() {
 }
 
 # 传输文件
-transfer_files() {
-  local source_path="$1"
-  local destination_path="$2"
-  file="$(basename "$source_path")"
-  full_path="${destination_path%/}/${file}"
+transfer_file() {
+  local source="$1"
+  local destination="$2"
+  local source_file="$3"
+  local dest_dir="$4"
+  local isdir="$5"
 
-  ensure_directory_exists "$destination_path"
-  log_info "Transferring files from ${source_path} to remote:${destination_path}..."
-  scp -r "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
-  log_success "File transfer to remote server completed successfully."
-  set_file_permissions "$full_path"
-}
-
-
-# 传输脚本文件
-transfer_script() {
-  local source_script="$1"
-  local remote_script="$2"
-  remote_dir="$(dirname "$remote_script")"
-  source_script_name="$(basename "$source_script")"
-  remote_script_name="$(basename "$remote_script")" #防止脚本名字复制过去和配置的不一样
-
-  ensure_directory_exists "$remote_dir"
-  log_info "Checking if remote script ${remote_script} exists on remote host..."
-  if ssh "remote" "[ -f ${remote_script} ]"; then
-    log_info "Remote script ${remote_script} exists. Checking if it is identical to the Source script..."
-    source_md5=$(md5sum "$source_script" | awk '{print $1}')
-    remote_md5=$(ssh "remote" "md5sum ${remote_script}" | awk '{print $1}')
-    if [ "$source_md5" == "$remote_md5" ]; then
-      log_success "Source script and remote script are identical. No need to transfer."
-      set_file_permissions "${remote_script}"
-      return 0
+  if ! "${isdir}"; then
+    log_info "Checking if remote file ${destination} exists on remote host..."
+    if ssh "remote" "[ -f ${destination} ]"; then
+      log_info "Remote file ${destination} exists. Checking if it is identical to the source file..."
+      source_md5=$(md5sum "${source}" | awk '{print $1}')
+      remote_md5=$(ssh "remote" "md5sum ${destination}" | awk '{print $1}')
+      if [ "$source_md5" == "$remote_md5" ]; then
+        log_success "Source file and remote file are identical. No need to transfer."
+        set_permissions "${destination}"
+        return 0
+      else
+        log_warning "Source file and remote file differ."
+      fi
     else
-      log_warning "Source script and remote script differ. Transferring source script to remote..."
+      log_warning "Remote file ${destination} does not exist."
+      ensure_directory_exists "${dest_dir}"
     fi
+    log_warning "Transferring files from ${source} to remote:${destination}..."
+    scp "${source}" "remote:${destination}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
   else
-    log_warning "Remote script ${remote_script} does not exist. Transferring source script to remote..."
+    log_warning "${source_file} is a directory."
+    ensure_directory_exists "${dest_dir}"
+    scp -r "${source}" "remote:${destination}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
   fi
-  scp "$source_script" "remote:${remote_dir}/${remote_script_name}" || { log_error "Error: Failed to transfer source script to remote server."; exit 1; }
-  log_success "Script ${remote_script} successfully transferred to remote server."
-  set_file_permissions "${remote_script}"
+  log_success "File: ${source} transfer to remote:${destination} completed successfully."
+  set_permissions "${destination}"
 }
 
+# 传输文件
+# transfer_files() {
+#   local source_path="$1"
+#   local destination_path="$2"
+#   file="$(basename "$source_path")"
+#   full_path="${destination_path%/}/${file}"
+
+#   ensure_directory_exists "$destination_path"
+#   log_info "Transferring files from ${source_path} to remote:${destination_path}..."
+#   scp -r "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
+#   log_success "File transfer to remote server completed successfully."
+#   set_permissions "$full_path"
+# }
+
+# 传输任何文件（包括目录）
+transfer() {
+  local source="$1"
+  local destination="$2"
+  local source_file="$3"
+  local dest_dir="$4"
+
+  ensure_directory_exists "${dest_dir}"
+  log_warning "Transferring files from ${source} to remote:${destination}..."
+  scp -r "${source}" "remote:${destination}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
+  log_success "File: ${source} transfer to remote:${destination} completed successfully."
+  set_permissions "${destination}"
+}
+
+# todo(){
+#   local source="$1"
+#   local destination="$2"
+  
+#   if [[ "${destination: -1}" == "/" ]]; then
+#     destination="${destination}$(basename "$source")"
+#   fi
+#     exec_scp "${source}" "${destination}"
+# }
+
+# set_destination(){
+#   local destination="$1"
+  
+#   if [[ "${destination: -1}" == "/" ]]; then
+#     destination="${destination}$(basename "$source")"
+#   fi
+#   echo "${destination}"
+# }
+
+config_transfer(){
+  local source="$1"
+  local destination="$2"
+
+  if [[ "${destination: -1}" == "/" ]]; then
+    destination="${destination}$(basename "$source")"
+  fi
+  source_file=$(basename "${source}")
+  dest_dir=$(dirname "${destination}")
+  if [ -d "${source}" ]; then
+    isdir="true"
+  else
+    isdir="false"
+  fi
+  echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
+}
+FILE_TRANSFER_CONF=$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")
+SCRIPT_TRANSFER_CONF=$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")
+
+# transfer "${FILE_TRANSFER_CONF}"
+# transfer "${SCRIPT_TRANSFER_CONF}"
 # 执行远程部署
 execute_deployment() {
   local deploy_script="$1"
@@ -323,7 +383,7 @@ check_transfer_files(){
   if [ "$TRANSFER_FILES" == "yes" ]; then
     check_param "$SOURCE_FILE_PATH" "Source file path"
     check_param "$DESTINATION_PATH" "Destination path"
-    transfer_files "$SOURCE_FILE_PATH" "$DESTINATION_PATH" "remote"
+    transfer_file "${FILE_TRANSFER_CONF}"
   else
     log_warning "Skipping file transfer as per configuration."
   fi    
@@ -336,13 +396,13 @@ check_execute_deployment(){
     check_param "$DEPLOY_SCRIPT" "Deploy script"
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
-      transfer_script "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT"
+      transfer_file "${SCRIPT_TRANSFER_CONF}"
     else
-      if ssh "remote" "[ -f ${remote_script} ]"; then
-        log_info "Remote script ${remote_script} exists."
-        set_file_permissions "$DEPLOY_SCRIPT" 
+      if ssh "remote" "[ -f ${DEPLOY_SCRIPT} ]"; then
+        log_info "Remote script ${DEPLOY_SCRIPT} exists."
+        set_permissions "$DEPLOY_SCRIPT" 
       else
-        log_error "Error:Remote script ${remote_script} does not exist. Please check your config: DEPLOY_SCRIPT."
+        log_error "Error:Remote script ${DEPLOY_SCRIPT} does not exist. Please check your config: DEPLOY_SCRIPT."
         exit 1
       fi     
     fi  
