@@ -384,7 +384,7 @@ check_transfer_files(){
   if [ "$TRANSFER_FILES" == "yes" ]; then
     check_param "$SOURCE_FILE_PATH" "Source file path"
     check_param "$DESTINATION_PATH" "Destination path"
-    transfer_file "${FILE_TRANSFER_CONF}"
+    transfer_file "$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
   else
     log_warning "Skipping file transfer as per configuration."
   fi    
