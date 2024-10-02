@@ -268,12 +268,6 @@ transfer_script() {
     log_warning "Remote script ${remote_script} does not exist. Transferring source script to remote..."
   fi
   scp "$source_script" "remote:${remote_dir}/${remote_script_name}" || { log_error "Error: Failed to transfer source script to remote server."; exit 1; }
-  if [ "$remote_script_name" == "$source_script_name" ]; then
-    log_info "The final script name: ${remote_dir}/${source_script_name} matches the configured DEPLOY_SCRIPT name: ${remote_script}. Nothing to do."
-  else
-    log_info "Performing rename operation to ensure the final script name: ${remote_dir}/${source_script_name} matches the configured DEPLOY_SCRIPT name: ${remote_script} ..."
-    execute_command "sudo mv ${remote_dir}/${source_script_name} ${remote_script}"
-  fi  
   log_success "Script ${remote_script} successfully transferred to remote server."
   set_file_permissions "${remote_script}"
 }
