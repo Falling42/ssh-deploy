@@ -212,42 +212,69 @@ ensure_directory_exists() {
   fi
 }
 
-# 传输文件
-transfer_files() {
-  local source_path="$1"
-  local destination_path="$2"
-
-  ensure_directory_exists "$destination_path"
-  log_info "Transferring files from ${source_path} to remote:${destination_path}..."
-  scp "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to ${remote_host} failed."; exit 1; }
-  log_success "File transfer to remote server completed successfully."
-  set_dir_permissions "$destination_path"
-}
-
-# 为目录设置权限
-set_dir_permissions() {
-  local remote_dir="$1"
-  local permissions="${2:-}"
-  
-  if [ -z "$permissions" ]; then
-    permissions="755"
-  fi
-  log_info "Setting file permissions for ${remote_dir} on remote host..."
-  execute_command "sudo chmod -R ${permissions} ${remote_dir}" || { log_error "Error: Failed to set file permissions for ${remote_dir}."; exit 1; }
-  log_success "Directory permissions for ${remote_dir} set to ${permissions} successfully."
-}
-
 # 为文件设置权限
 set_file_permissions() {
   local remote_file_path="$1"
-  local permissions="${2:-}"
+  local permissions="${2:-755}"
   
-  if [ -z "$permissions" ]; then
-    permissions="755"
+  log_info "Checking current permissions for ${remote_file_path} on remote host..."
+  current_permissions="$(ssh remote "stat -c '%a' ${remote_file_path}")"
+  if [ "$current_permissions" == "$permissions" ]; then
+    log_success "Current permissions for ${remote_file_path} are already set to ${permissions}. No need to change."
+    return 0
   fi
   log_info "Setting file permissions for ${remote_file_path} on remote host..."
   execute_command "sudo chmod ${permissions} ${remote_file_path}" || { log_error "Error: Failed to set file permissions for ${remote_file_path}."; exit 1; }
   log_success "File permissions for ${remote_file_path} set to ${permissions} successfully."
+}
+
+# 传输文件
+transfer_files() {
+  local source_path="$1"
+  local destination_path="$2"
+  file="$(basename "$source_path")"
+  full_path="${destination_path}/${file}"
+
+  ensure_directory_exists "$destination_path"
+  log_info "Transferring files from ${source_path} to remote:${destination_path}..."
+  scp -r "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
+  log_success "File transfer to remote server completed successfully."
+  set_file_permissions "$full_path"
+}
+
+
+# 传输脚本文件
+transfer_script() {
+  local source_script="$1"
+  local remote_script="$2"
+  remote_dir="$(dirname "$remote_script")"
+  source_script_name="$(basename "$source_script")"
+  remote_script_name="$(basename "$remote_script")" #防止脚本名字复制过去和配置的不一样
+
+  log_info "Checking if remote script ${remote_script} exists on remote host..."
+  if ssh "remote" "[ -f ${remote_script} ]"; then
+    log_info "Remote script ${remote_script} exists. Checking if it is identical to the Source script..."
+    source_md5=$(md5sum "$source_script" | awk '{print $1}')
+    remote_md5=$(ssh "remote" "md5sum ${remote_script}" | awk '{print $1}')
+    if [ "$source_md5" == "$remote_md5" ]; then
+      log_success "Source script and remote script are identical. No need to transfer."
+      set_file_permissions "${remote_script}"
+      return 0
+    else
+      log_warning "Source script and remote script differ. Transferring source script to remote..."
+    fi
+  else
+    log_warning "Remote script ${remote_script} does not exist. Transferring source script to remote..."
+  fi
+  scp "$source_script" "remote:${remote_dir}" || { log_error "Error: Failed to transfer source script to remote server."; exit 1; }
+  if [ "$remote_script_name" == "$source_script_name" ]; then
+    log_info "The final script name: ${remote_dir}/${source_script_name} matches the configured DEPLOY_SCRIPT name: ${remote_script}. Nothing to do."
+  else
+    log_info "Performing rename operation to ensure the final script name: ${remote_dir}/${source_script_name} matches the configured DEPLOY_SCRIPT name: ${remote_script} ..."
+    execute_command "sudo mv ${remote_dir}/${source_script_name} ${remote_script}"
+  fi  
+  log_success "Script ${remote_script} successfully transferred to remote server."
+  set_file_permissions "${remote_script}"
 }
 
 # 执行远程部署
@@ -303,7 +330,7 @@ check_transfer_files(){
     check_param "$DESTINATION_PATH" "Destination path"
     transfer_files "$SOURCE_FILE_PATH" "$DESTINATION_PATH" "remote"
   else
-    log_info "Skipping file transfer as per configuration."
+    log_warning "Skipping file transfer as per configuration."
   fi    
 }
 
@@ -312,23 +339,27 @@ check_execute_deployment(){
   if [ "$EXECUTE_REMOTE_SCRIPT" == "yes" ]; then
     check_param "$COPY_SCRIPT" "Copy script"
     check_param "$DEPLOY_SCRIPT" "Deploy script"
-
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
-      dir="$(dirname "$DEPLOY_SCRIPT")"
-      transfer_files "$SOURCE_SCRIPT" "${dir}" "remote"
-    fi
-
-    set_file_permissions "$DEPLOY_SCRIPT" 
+      transfer_script "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT"
+    else
+      if ssh "remote" "[ -f ${remote_script} ]"; then
+        log_info "Remote script ${remote_script} exists."
+        set_file_permissions "$DEPLOY_SCRIPT" 
+      else
+        log_error "Error:Remote script ${remote_script} does not exist. Please check your config: DEPLOY_SCRIPT."
+        exit 1
+      fi     
+    fi  
     execute_deployment "$DEPLOY_SCRIPT" "$SERVICE_NAME" "$SERVICE_VERSION"
   else
-    log_info "Skipping remote script execution as per configuration."
+    log_warning "Skipping remote script execution as per configuration."
   fi  
 }
 
 # 主函数
 main(){
-  log_info "Script Version: ${MAGENTA}v0.2.0${RESET}"
+  log_info "Script Version: ${MAGENTA}v0.2.1-alpha${RESET}"
   check_required_params
   setup_ssh
   check_transfer_files
