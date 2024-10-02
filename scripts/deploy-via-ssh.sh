@@ -254,7 +254,7 @@ transfer_file() {
 
   if ! "${isdir}"; then
     log_info "Checking if remote file ${destination} exists on remote host..."
-    if ssh "remote" "[ -f ${destination} ]"; then
+    if ssh remote [ -f ${destination} ]; then
       log_info "Remote file ${destination} exists. Checking if it is identical to the source file..."
       source_md5=$(md5sum "${source}" | awk '{print $1}')
       remote_md5=$(ssh "remote" "md5sum ${destination}" | awk '{print $1}')
@@ -347,7 +347,7 @@ check_execute_deployment(){
       check_param "$SOURCE_SCRIPT" "Source script"
       transfer_file "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT"
     else
-      if ssh "remote" "[ -f ${DEPLOY_SCRIPT} ]"; then
+      if ssh remote [ -f ${DEPLOY_SCRIPT} ]; then
         log_info "Remote script ${DEPLOY_SCRIPT} exists."
         set_permissions "$DEPLOY_SCRIPT" 
       else
