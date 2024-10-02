@@ -326,7 +326,9 @@ config_transfer(){
   else
     isdir="false"
   fi
-  echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
+  local values=("${source}" "${destination}" "${source_file}" "${dest_dir}" "${isdir}")
+  echo "${values[@]}"
+  # echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
 }
 FILE_TRANSFER_CONF="$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
 SCRIPT_TRANSFER_CONF="$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")"
