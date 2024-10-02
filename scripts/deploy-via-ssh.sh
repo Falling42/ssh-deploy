@@ -228,6 +228,24 @@ set_permissions() {
   log_success "File permissions for ${remote_file_path} set to ${permissions} successfully."
 }
 
+# 传递参数
+config_transfer(){
+  local source="$1"
+  local destination="$2"
+
+  if [[ "${destination: -1}" == "/" ]]; then
+    destination="${destination}$(basename "$source")"
+  fi
+  source_file=$(basename "${source}")
+  dest_dir=$(dirname "${destination}")
+  if [ -d "${source}" ]; then
+    isdir="true"
+  else
+    isdir="false"
+  fi
+  echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
+}
+
 # 传输文件
 transfer_file() {
   local source destination source_file dest_dir isdir
@@ -256,25 +274,12 @@ transfer_file() {
   else
     log_warning "${source_file} is a directory."
     ensure_directory_exists "${dest_dir}"
+    log_warning "Transferring files from ${source} to remote:${destination}..."
     scp -r "${source}" "remote:${destination}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
   fi
   log_success "File: ${source} transfer to remote:${destination} completed successfully."
   set_permissions "${destination}"
 }
-
-# 传输文件
-# transfer_files() {
-#   local source_path="$1"
-#   local destination_path="$2"
-#   file="$(basename "$source_path")"
-#   full_path="${destination_path%/}/${file}"
-
-#   ensure_directory_exists "$destination_path"
-#   log_info "Transferring files from ${source_path} to remote:${destination_path}..."
-#   scp -r "${source_path}" "remote:${destination_path}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
-#   log_success "File transfer to remote server completed successfully."
-#   set_permissions "$full_path"
-# }
 
 # 传输任何文件（包括目录）
 transfer() {
@@ -289,46 +294,6 @@ transfer() {
   log_success "File: ${source} transfer to remote:${destination} completed successfully."
   set_permissions "${destination}"
 }
-
-# todo(){
-#   local source="$1"
-#   local destination="$2"
-  
-#   if [[ "${destination: -1}" == "/" ]]; then
-#     destination="${destination}$(basename "$source")"
-#   fi
-#     exec_scp "${source}" "${destination}"
-# }
-
-# set_destination(){
-#   local destination="$1"
-  
-#   if [[ "${destination: -1}" == "/" ]]; then
-#     destination="${destination}$(basename "$source")"
-#   fi
-#   echo "${destination}"
-# }
-
-config_transfer(){
-  local source="$1"
-  local destination="$2"
-
-  if [[ "${destination: -1}" == "/" ]]; then
-    destination="${destination}$(basename "$source")"
-  fi
-  source_file=$(basename "${source}")
-  dest_dir=$(dirname "${destination}")
-  if [ -d "${source}" ]; then
-    isdir="true"
-  else
-    isdir="false"
-  fi
-  # local values=("${source}" "${destination}" "${source_file}" "${dest_dir}" "${isdir}")
-  # echo "${values[@]}"
-  echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
-}
-FILE_TRANSFER_CONF="$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
-SCRIPT_TRANSFER_CONF="$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")"
 
 # 执行远程部署
 execute_deployment() {
