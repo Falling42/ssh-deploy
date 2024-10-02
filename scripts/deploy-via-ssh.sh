@@ -233,7 +233,7 @@ transfer_files() {
   local source_path="$1"
   local destination_path="$2"
   file="$(basename "$source_path")"
-  full_path="${destination_path}/${file}"
+  full_path="${destination_path%/}/${file}"
 
   ensure_directory_exists "$destination_path"
   log_info "Transferring files from ${source_path} to remote:${destination_path}..."
