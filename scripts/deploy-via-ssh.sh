@@ -328,8 +328,8 @@ config_transfer(){
   fi
   echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
 }
-FILE_TRANSFER_CONF=$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")
-SCRIPT_TRANSFER_CONF=$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")
+FILE_TRANSFER_CONF="$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
+SCRIPT_TRANSFER_CONF="$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")"
 
 # transfer "${FILE_TRANSFER_CONF}"
 # transfer "${SCRIPT_TRANSFER_CONF}"
