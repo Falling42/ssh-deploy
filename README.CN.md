@@ -22,27 +22,27 @@
 
 ## 输入参数
 
-| 输入名称                | 描述                                            | 是否必需 | 默认值 |
-| ----------------------- | ----------------------------------------------- | -------- | ------ |
-| `use_screen`            | 是否使用`screen`执行命令 (`yes` 或 `no`)        | 否       | `no`   |
-| `use_jump_host`         | 是否使用跳板机 (`yes` 或 `no`)                  | 否       | `no`   |
-| `jump_ssh_host`         | 跳板机的 SSH 主机名                             | 否       |        |
-| `jump_ssh_user`         | 跳板机的 SSH 用户名                             | 否       |        |
-| `jump_ssh_private_key`  | 跳板机的 SSH 私钥                               | 否       |        |
-| `jump_ssh_port`         | 跳板机的 SSH 端口 (默认值为 `22`)               | 否       | `22`   |
-| `ssh_host`              | 远程服务器的 SSH 主机名                         | 是       |        |
-| `ssh_user`              | 远程服务器的 SSH 用户名                         | 是       |        |
-| `ssh_private_key`       | 远程服务器的 SSH 私钥                           | 是       |        |
-| `ssh_port`              | 远程服务器的 SSH 端口 (默认值为 `22`)           | 否       | `22`   |
-| `execute_remote_script` | 是否执行远程脚本 (`yes` 或 `no`)                | 否       | `no`   |
-| `copy_script`           | 是否从您的仓库中复制部署脚本 (`yes` 或 `no`)    | 否       | `no`   |
-| `source_script`         | 仓库中源脚本的相对路径 (包含文件名)             | 否       |        |
-| `deploy_script`         | 远程服务器上部署脚本的完整路径 (包含文件名)     | 否       |        |
-| `service_name`          | 要部署的服务名称                                | 否       |        |
-| `service_version`       | 要部署的服务版本                                | 否       |        |
-| `transfer_files`        | 是否将文件传输到远程服务器 (`yes` 或 `no`)      | 是       | `yes`  |
-| `source_file_path`      | 要上传的文件在仓库中的相对路径 (包含文件名)     | 否       |        |
-| `destination_path`      | 远程服务器上要传输文件的完整路径 (不包含文件名) | 否       |        |
+| 输入名称                | 描述                                              | 是否必需 | 默认值 |
+| ----------------------- | ------------------------------------------------- | -------- | ------ |
+| `use_screen`            | 是否使用`screen`执行命令 (`yes` 或 `no`)          | 否       | `no`   |
+| `use_jump_host`         | 是否使用跳板机 (`yes` 或 `no`)                    | 否       | `no`   |
+| `jump_ssh_host`         | 跳板机的 SSH 主机名                               | 否       |        |
+| `jump_ssh_user`         | 跳板机的 SSH 用户名                               | 否       |        |
+| `jump_ssh_private_key`  | 跳板机的 SSH 私钥                                 | 否       |        |
+| `jump_ssh_port`         | 跳板机的 SSH 端口 (默认值为 `22`)                 | 否       | `22`   |
+| `ssh_host`              | 远程服务器的 SSH 主机名                           | 是       |        |
+| `ssh_user`              | 远程服务器的 SSH 用户名                           | 是       |        |
+| `ssh_private_key`       | 远程服务器的 SSH 私钥                             | 是       |        |
+| `ssh_port`              | 远程服务器的 SSH 端口 (默认值为 `22`)             | 否       | `22`   |
+| `execute_remote_script` | 是否执行远程脚本 (`yes` 或 `no`)                  | 否       | `no`   |
+| `copy_script`           | 是否从您的仓库中复制部署脚本 (`yes` 或 `no`)      | 否       | `no`   |
+| `source_script`         | 仓库中源脚本的相对路径 (必须包含文件名)           | 否       |        |
+| `deploy_script`         | 远程服务器上部署脚本的完整路径 (必须包含文件名)   | 否       |        |
+| `service_name`          | 要部署的服务名称                                  | 否       |        |
+| `service_version`       | 要部署的服务版本                                  | 否       |        |
+| `transfer_files`        | 是否将文件传输到远程服务器 (`yes` 或 `no`)        | 是       | `yes`  |
+| `source_file_path`      | 要上传的文件在仓库中的相对路径 (必须包含文件名)   | 否       |        |
+| `destination_path`      | 远程服务器上要传输文件的完整路径 (可不包含文件名) | 否       |        |
 
 ## 示例工作流
 
