@@ -267,7 +267,7 @@ transfer_script() {
   else
     log_warning "Remote script ${remote_script} does not exist. Transferring source script to remote..."
   fi
-  scp "$source_script" "remote:${remote_dir}" || { log_error "Error: Failed to transfer source script to remote server."; exit 1; }
+  scp "$source_script" "remote:${remote_dir}/${remote_script_name}" || { log_error "Error: Failed to transfer source script to remote server."; exit 1; }
   if [ "$remote_script_name" == "$source_script_name" ]; then
     log_info "The final script name: ${remote_dir}/${source_script_name} matches the configured DEPLOY_SCRIPT name: ${remote_script}. Nothing to do."
   else
