@@ -230,12 +230,9 @@ set_permissions() {
 
 # 传输文件
 transfer_file() {
-  echo "Received values: $1, $2, $3, $4, $5"
-  local source="$1"
-  local destination="$2"
-  local source_file="$3"
-  local dest_dir="$4"
-  local isdir="$5"
+  local source destination source_file dest_dir isdir
+  # 使用 read 捕获并解包 config_transfer 的输出
+  read -r source destination source_file dest_dir isdir <<< "$(config_transfer "$1" "$2")"
 
   if ! "${isdir}"; then
     log_info "Checking if remote file ${destination} exists on remote host..."
@@ -326,15 +323,13 @@ config_transfer(){
   else
     isdir="false"
   fi
-  local values=("${source}" "${destination}" "${source_file}" "${dest_dir}" "${isdir}")
-  echo "${values[@]}"
-  # echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
+  # local values=("${source}" "${destination}" "${source_file}" "${dest_dir}" "${isdir}")
+  # echo "${values[@]}"
+  echo "${source} ${destination} ${source_file} ${dest_dir} ${isdir}"
 }
 FILE_TRANSFER_CONF="$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
 SCRIPT_TRANSFER_CONF="$(config_transfer "${SOURCE_SCRIPT}" "${DEPLOY_SCRIPT}")"
 
-# transfer "${FILE_TRANSFER_CONF}"
-# transfer "${SCRIPT_TRANSFER_CONF}"
 # 执行远程部署
 execute_deployment() {
   local deploy_script="$1"
@@ -382,11 +377,11 @@ setup_ssh(){
 }
 
 # 处理文件传输
-check_transfer_files(){
+check_transfer_file(){
   if [ "$TRANSFER_FILES" == "yes" ]; then
     check_param "$SOURCE_FILE_PATH" "Source file path"
     check_param "$DESTINATION_PATH" "Destination path"
-    transfer_file "$(config_transfer "${SOURCE_FILE_PATH}" "${DESTINATION_PATH}")"
+    transfer_file "$SOURCE_FILE_PATH" "$DESTINATION_PATH"
   else
     log_warning "Skipping file transfer as per configuration."
   fi    
@@ -399,7 +394,7 @@ check_execute_deployment(){
     check_param "$DEPLOY_SCRIPT" "Deploy script"
     if [ "$COPY_SCRIPT" == "yes" ]; then
       check_param "$SOURCE_SCRIPT" "Source script"
-      transfer_file "${SCRIPT_TRANSFER_CONF}"
+      transfer_file "$SOURCE_SCRIPT" "$DEPLOY_SCRIPT"
     else
       if ssh "remote" "[ -f ${DEPLOY_SCRIPT} ]"; then
         log_info "Remote script ${DEPLOY_SCRIPT} exists."
@@ -420,7 +415,7 @@ main(){
   log_info "Script Version: ${MAGENTA}v0.2.1-alpha${RESET}"
   check_required_params
   setup_ssh
-  check_transfer_files
+  check_transfer_file
   check_execute_deployment
 }
 
