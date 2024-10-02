@@ -281,20 +281,6 @@ transfer_file() {
   set_permissions "${destination}"
 }
 
-# 传输任何文件（包括目录）
-transfer() {
-  local source="$1"
-  local destination="$2"
-  local source_file="$3"
-  local dest_dir="$4"
-
-  ensure_directory_exists "${dest_dir}"
-  log_warning "Transferring files from ${source} to remote:${destination}..."
-  scp -r "${source}" "remote:${destination}" || { log_error "Error: File transfer to remote server failed."; exit 1; }
-  log_success "File: ${source} transfer to remote:${destination} completed successfully."
-  set_permissions "${destination}"
-}
-
 # 执行远程部署
 execute_deployment() {
   local deploy_script="$1"
