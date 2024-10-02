@@ -251,6 +251,7 @@ transfer_script() {
   source_script_name="$(basename "$source_script")"
   remote_script_name="$(basename "$remote_script")" #防止脚本名字复制过去和配置的不一样
 
+  ensure_directory_exists "$remote_dir"
   log_info "Checking if remote script ${remote_script} exists on remote host..."
   if ssh "remote" "[ -f ${remote_script} ]"; then
     log_info "Remote script ${remote_script} exists. Checking if it is identical to the Source script..."
