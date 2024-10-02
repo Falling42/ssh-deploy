@@ -230,6 +230,7 @@ set_permissions() {
 
 # 传输文件
 transfer_file() {
+  echo "Received values: $1, $2, $3, $4, $5"
   local source="$1"
   local destination="$2"
   local source_file="$3"
